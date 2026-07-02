@@ -1,0 +1,40 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model CommandLog {
+  id            Int      @id @default(autoincrement())
+  interactionId String   @unique
+  commandName   String
+  userId        String
+  channelId     String
+  payload       Json
+  status        String   @default("pending") // pending, success, failed
+  aiAnalysis    String?  @db.Text
+  createdAt     DateTime @default(now())
+}
+
+model CommandConfig {
+  id        Int     @id @default(autoincrement())
+  command   String  @unique
+  isEnabled Boolean @default(true)
+  replyText String?
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String   @default("user") // admin, user
+  createdAt DateTime @default(now())
+}
+
+model SystemConfig {
+  key   String @id
+  value String
+}
