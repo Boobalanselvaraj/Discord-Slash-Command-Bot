@@ -16,7 +16,11 @@ const app = express();
 
 app.use(morgan('dev'));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    process.env.FRONTEND_URL, 
+    'http://localhost:5173', 
+    'https://discord-slash-app-sage.vercel.app'
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(cookieParser());
