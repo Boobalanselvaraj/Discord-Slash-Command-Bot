@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (userData: User) => {
     setUser(userData);
     setIsAuthenticated(true);
-    navigate('/dashboard');
+    navigate('/dashboard', { replace: true });
   };
 
   const logout = async () => {
