@@ -23,6 +23,7 @@ app.use(cors({
   ].filter(Boolean),
   credentials: true
 }));
+
 app.use(cookieParser());
 // Note: Discord interactions require raw body parsing to verify the signature.
 // We will apply express.json() but preserve the raw body.

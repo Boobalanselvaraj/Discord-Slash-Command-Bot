@@ -17,13 +17,13 @@ router.get('/', async (req, res) => {
 // Update or create a command configuration
 router.put('/:command', async (req, res) => {
   const { command } = req.params;
-  const { isEnabled, replyText } = req.body;
+  const { isEnabled, replyText, systemPrompt } = req.body;
 
   try {
     const updated = await prisma.commandConfig.upsert({
       where: { command },
-      update: { isEnabled, replyText },
-      create: { command, isEnabled, replyText }
+      update: { isEnabled, replyText, systemPrompt },
+      create: { command, isEnabled, replyText, systemPrompt }
     });
     res.json(updated);
   } catch (error) {

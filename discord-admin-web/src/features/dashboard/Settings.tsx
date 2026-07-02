@@ -7,6 +7,7 @@ interface CommandConfig {
   command: string;
   isEnabled: boolean;
   replyText: string | null;
+  systemPrompt: string | null;
 }
 
 const Settings = () => {
@@ -28,16 +29,16 @@ const Settings = () => {
       const res = await api.get('/config');
 
       const defaultConfigs = [
-        { command: 'report', isEnabled: true, replyText: '' },
-        { command: 'status', isEnabled: true, replyText: 'Bot is online and fully operational.' },
-        { command: 'leave', isEnabled: true, replyText: '' },
-        { command: 'roastme', isEnabled: true, replyText: '' }
+        { command: 'report', isEnabled: true, replyText: '', systemPrompt: '' },
+        { command: 'status', isEnabled: true, replyText: 'Bot is online and fully operational.', systemPrompt: '' },
+        { command: 'leave', isEnabled: true, replyText: '', systemPrompt: '' },
+        { command: 'roastme', isEnabled: true, replyText: '', systemPrompt: '' }
       ];
 
       const dbConfigs = res.data;
       const merged = defaultConfigs.map(def => {
         const found = dbConfigs.find((c: any) => c.command === def.command);
-        return found ? { ...found, replyText: found.replyText || '' } : def;
+        return found ? { ...found, replyText: found.replyText || '', systemPrompt: found.systemPrompt || '' } : def;
       });
 
       setConfigs(merged);
@@ -77,6 +78,10 @@ const Settings = () => {
     setConfigs(configs.map(c => c.command === command ? { ...c, replyText: text } : c));
   };
 
+  const handlePromptChange = (command: string, text: string) => {
+    setConfigs(configs.map(c => c.command === command ? { ...c, systemPrompt: text } : c));
+  };
+
   const saveConfig = async (commandConfig: CommandConfig) => {
     const loadingToast = toast.loading(`Saving /${commandConfig.command} config...`, {
       style: {
@@ -90,7 +95,8 @@ const Settings = () => {
       setSaving(commandConfig.command);
       await api.put(`/config/${commandConfig.command}`, {
         isEnabled: commandConfig.isEnabled,
-        replyText: commandConfig.replyText || null
+        replyText: commandConfig.replyText || null,
+        systemPrompt: commandConfig.systemPrompt || null
       });
       toast.success(`/${commandConfig.command} configuration saved!`, {
         id: loadingToast,
@@ -265,6 +271,20 @@ const Settings = () => {
                     placeholder="Bot is online and fully operational."
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
                   />
+                </div>
+              )}
+
+              {['report', 'leave', 'roastme'].includes(config.command) && (
+                <div className="mt-4 mb-6">
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">AI System Prompt (Optional)</label>
+                  <textarea
+                    value={config.systemPrompt || ''}
+                    onChange={(e) => handlePromptChange(config.command, e.target.value)}
+                    placeholder={`Enter custom AI system instructions for /${config.command}`}
+                    rows={4}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all font-mono text-sm"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">Leave blank to use the default hard-coded AI instructions.</p>
                 </div>
               )}
 

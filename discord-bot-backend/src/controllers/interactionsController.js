@@ -2,12 +2,16 @@ import { sendNotification } from '../utils/webhook.js';
 import prisma from '../config/prisma.js';
 import { analyzeCommand } from '../utils/groq.js';
 
-const editDiscordResponse = async (applicationId, token, content) => {
+const editDiscordResponse = async (applicationId, token, content, components = []) => {
   try {
+    const body = { content };
+    if (components && components.length > 0) {
+      body.components = components;
+    }
     await fetch(`https://discord.com/api/v10/webhooks/${applicationId}/${token}/messages/@original`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content })
+      body: JSON.stringify(body)
     });
   } catch (err) {
     console.error('Failed to edit Discord response:', err);
@@ -44,7 +48,21 @@ export const handleReportCommand = async (req) => {
       data: { status: 'success', aiAnalysis }
     });
 
-    await editDiscordResponse(application_id, token, `Report received: "${reportText}" and mirrored successfully!\n🧠 **AI Triage:** ${aiAnalysis || 'N/A'}`);
+    const reportComponents = [
+      {
+        type: 1,
+        components: [
+          {
+            type: 2,
+            label: "Acknowledge",
+            style: 1,
+            custom_id: "acknowledge_report"
+          }
+        ]
+      }
+    ];
+
+    await editDiscordResponse(application_id, token, `Report received: "${reportText}" and mirrored successfully!\n🧠 **AI Triage:** ${aiAnalysis || 'N/A'}`, reportComponents);
   } catch (err) {
     await prisma.commandLog.update({ where: { interactionId: id }, data: { status: 'failed' }});
     await editDiscordResponse(application_id, token, 'Failed to process report. The backend webhook may be down.');

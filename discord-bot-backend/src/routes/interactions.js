@@ -113,6 +113,26 @@ router.post('/', verifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY), async (re
     }
   }
 
+  // 3 = MESSAGE_COMPONENT
+  if (type === 3) {
+    const customId = data.custom_id;
+    const username = member?.user?.username || user?.username || 'Unknown User';
+
+    if (customId === 'acknowledge_report') {
+      const originalMessage = req.body.message;
+      const content = originalMessage.content;
+      
+      // Respond with UPDATE_MESSAGE (type 7) to edit the message
+      return res.json({
+        type: 7,
+        data: {
+          content: `${content}\n\n✅ *Acknowledged by @${username}*`,
+          components: [] // Removes the button
+        }
+      });
+    }
+  }
+
   // Handle other types
   if (!res.headersSent) {
     return res.status(400).send('Unhandled interaction type');

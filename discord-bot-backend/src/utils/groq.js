@@ -1,4 +1,5 @@
 import Groq from "groq-sdk";
+import prisma from '../config/prisma.js';
 
 // Initialize Groq only if the key is provided
 let groq = null;
@@ -34,6 +35,12 @@ export const analyzeCommand = async (commandName, text) => {
       Respond ONLY with a single-line summary containing the Category, Severity, and a tiny note.
       Example: "Category: Harassment | Severity: High | Note: Requires immediate admin review."`;
           }
+
+    // Override system prompt with DB config if it exists
+    const config = await prisma.commandConfig.findUnique({ where: { command: commandName } });
+    if (config && config.systemPrompt && config.systemPrompt.trim() !== '') {
+      systemPrompt = config.systemPrompt;
+    }
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
