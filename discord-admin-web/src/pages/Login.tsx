@@ -42,7 +42,7 @@ const Login = () => {
           secondary: '#000',
         }
       });
-      login();
+      login(response.data.user);
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Login failed. Please check your credentials.', { 
         id: loadingToast,
@@ -161,7 +161,6 @@ const Login = () => {
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-zinc-300">Password</label>
-                  <a href="#" className="text-xs font-medium text-yellow-500 hover:text-yellow-400 transition-colors">Forgot password?</a>
                 </div>
                 <input
                   type="password"
